@@ -1,5 +1,6 @@
 #![feature(mixed_integer_ops)]
 #![feature(int_abs_diff)]
+#![feature(drain_filter)]
 
 use std::env;
 mod readfile;
@@ -10,6 +11,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 mod day18;
 
 fn main() {
@@ -30,6 +32,7 @@ fn main() {
         "5" => day5::run(),
         "6" => day6::run(),
         "7" => day7::run(),
+        "8" => day8::run(),
         "18" => day18::run(),
         _ => panic!("Unknown day: {}", day)
     }
