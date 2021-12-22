@@ -3,8 +3,9 @@
 #![feature(drain_filter)]
 
 use std::env;
-mod readfile;
 mod day1;
+mod day10;
+mod day18;
 mod day2;
 mod day3;
 mod day4;
@@ -13,7 +14,7 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
-mod day18;
+mod readfile;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -35,7 +36,8 @@ fn main() {
         "7" => day7::run(),
         "8" => day8::run(),
         "9" => day9::run(),
+        "10" => day10::run(),
         "18" => day18::run(),
-        _ => panic!("Unknown day: {}", day)
+        _ => panic!("Unknown day: {}", day),
     }
 }
