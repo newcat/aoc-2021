@@ -11,6 +11,7 @@ mod day12;
 mod day13;
 mod day14;
 mod day15;
+mod day17;
 mod day18;
 mod day2;
 mod day3;
@@ -48,6 +49,7 @@ fn main() {
         "13" => day13::run(),
         "14" => day14::run(),
         "15" => day15::run(),
+        "17" => day17::run(),
         "18" => day18::run(),
         _ => panic!("Unknown day: {}", day),
     }
