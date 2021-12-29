@@ -12,14 +12,15 @@
                 "args": [
                     "build",
                     "--bin=aoc",
-                    "--package=aoc"
+                    "--package=aoc",
+                    "--profile=dev"
                 ],
                 "filter": {
                     "name": "aoc",
                     "kind": "bin"
                 }
             },
-            "args": ["20"],
+            "args": ["24"],
             "cwd": "${workspaceFolder}"
         },
         {
