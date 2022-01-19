@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use indextree::{Arena, NodeId};
 
 unsafe fn to_mut<T>(reference: &T) -> &mut T {
@@ -25,7 +25,7 @@ impl SnailfishNumber {
         SnailfishNumber {
             node_type: SnailfishNumberType::Value,
             index: 0,
-            value: value,
+            value,
         }
     }
 
@@ -140,13 +140,13 @@ impl Tree {
             let node = arena.get(n).unwrap();
             if matches!(node.get().node_type, SnailfishNumberType::Value) {
                 unsafe { to_mut(node.get()) }.index = index;
-                index = index + 1;
+                index += 1;
             }
         }
     }
 
     pub fn get_value(&self, node_id: NodeId) -> Option<usize> {
-        self.arena.get(node_id).and_then(|n| Some(n.get().value))
+        self.arena.get(node_id).map(|n| n.get().value)
     }
 
     pub fn set_value(&mut self, node_id: NodeId, value: usize) {
@@ -190,9 +190,8 @@ impl Tree {
             }
             SnailfishNumberType::Pair => {
                 for n in node.children(&self.arena) {
-                    match self.find_index_recursive(n, index) {
-                        Some(result) => return Some(result),
-                        None => {}
+                    if let Some(result) = self.find_index_recursive(n, index) {
+                        return Some(result);
                     }
                 }
                 return None;

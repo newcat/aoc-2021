@@ -3,6 +3,7 @@
 #![feature(drain_filter)]
 #![feature(map_first_last)]
 #![feature(exact_size_is_empty)]
+#![allow(clippy::needless_return)]
 
 use std::env;
 mod day1;
@@ -32,7 +33,7 @@ mod readfile;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    if args.len() == 1 || (&args[1]).len() == 0 {
+    if args.len() == 1 || (&args[1]).is_empty() {
         println!("No day specified");
         std::process::exit(1);
     }

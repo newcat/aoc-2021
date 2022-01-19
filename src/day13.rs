@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use regex::Regex;
 use std::collections::VecDeque;
 
@@ -28,13 +28,13 @@ impl Game {
         // true if parsing points, false if parsing fold instructions
         let mut parse_mode = true;
         for l in lines.lines() {
-            if l == "" {
+            if l.is_empty() {
                 parse_mode = false;
                 continue;
             }
 
             if parse_mode {
-                let coordinates: Vec<&str> = l.split(",").collect();
+                let coordinates: Vec<&str> = l.split(',').collect();
                 let p = [
                     coordinates[0].parse().unwrap(),
                     coordinates[1].parse().unwrap(),
@@ -49,16 +49,16 @@ impl Game {
                 };
                 let coordinate: usize = groups[2].parse().unwrap();
                 folds.push_back(FoldInstruction {
-                    direction: direction,
-                    coordinate: coordinate,
+                    direction,
+                    coordinate,
                 });
             }
         }
-        points.sort();
+        points.sort_unstable();
 
         return Game {
-            points: points,
-            folds: folds,
+            points,
+            folds,
         };
     }
 
@@ -71,7 +71,7 @@ impl Game {
             .iter()
             .map(|p| {
                 if p[coord_index] > coordinate {
-                    let mut new_point = p.clone();
+                    let mut new_point = *p;
                     new_point[coord_index] = 2 * coordinate - p[coord_index];
                     return new_point;
                 } else {
@@ -79,7 +79,7 @@ impl Game {
                 }
             })
             .collect();
-        new_points.sort();
+        new_points.sort_unstable();
         new_points.dedup();
         self.points = new_points;
     }
@@ -95,7 +95,7 @@ impl Game {
                     print!(" ");
                 }
             }
-            println!("");
+            println!();
         }
     }
 }
@@ -108,7 +108,7 @@ fn part1(lines: &readfile::Lines) {
 
 fn part2(lines: &readfile::Lines) {
     let mut game = Game::new(lines);
-    while game.folds.len() > 0 {
+    while !game.folds.is_empty() {
         game.fold();
     }
     game.print();

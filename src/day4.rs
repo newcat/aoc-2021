@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 
 struct Board {
     nums: [[u8; 5]; 5],
@@ -6,21 +6,19 @@ struct Board {
 }
 
 impl Board {
-    fn new(lines: &Vec<&str>, range: std::ops::Range<usize>) -> Board {
-        let mut local_index = 0;
+    fn new(lines: &[&str], range: std::ops::Range<usize>) -> Board {
         let mut nums: [[u8; 5]; 5] = [[0; 5]; 5];
-        for i in range {
+        for (local_index, i) in range.enumerate() {
             let values: [u8; 5] = lines[i]
                 .split_whitespace()
-                .map(|v| u8::from_str_radix(v, 10).unwrap())
+                .map(|v| v.parse::<u8>().unwrap())
                 .collect::<Vec<u8>>()
                 .try_into()
                 .unwrap();
             nums[local_index] = values;
-            local_index += 1;
         }
         return Board {
-            nums: nums,
+            nums,
             marked: [[false; 5]; 5],
         };
     }
@@ -70,13 +68,10 @@ struct Game {
 impl Game {
     fn new(lines: &readfile::Lines) -> Game {
         let l: Vec<&str> = lines.lines().collect();
-        let values = l[0]
-            .split(",")
-            .map(|v| u8::from_str_radix(v, 10).unwrap())
-            .collect();
+        let values = l[0].split(',').map(|v| v.parse::<u8>().unwrap()).collect();
         let mut game = Game {
             boards: Vec::new(),
-            values: values,
+            values,
         };
 
         let mut index = 1;

@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use std::collections::HashSet;
 
 type Point = [isize; 2];
@@ -13,7 +13,7 @@ struct Image {
 }
 
 impl Image {
-    pub fn enhance(&self, algorithm: &Vec<u8>) -> Image {
+    pub fn enhance(&self, algorithm: &[u8]) -> Image {
         let mut enhanced = HashSet::new();
 
         for y in self.min_y - 1..=self.max_y + 1 {
@@ -47,7 +47,7 @@ impl Image {
         }
 
         return Image {
-            are_outside_pixels_on: are_outside_pixels_on,
+            are_outside_pixels_on,
             light_pixels: enhanced,
             min_x: self.min_x - 1,
             max_x: self.max_x + 1,
@@ -62,7 +62,7 @@ impl Image {
         for cy in y - 1..=y + 1 {
             for cx in x - 1..=x + 1 {
                 let px = if self.is_pixel_on(cx, cy) { 1 } else { 0 };
-                value = value | (px << i);
+                value |= px << i;
                 i -= 1;
             }
         }
@@ -94,7 +94,7 @@ impl std::fmt::Debug for Image {
                     write!(f, ".").expect("Fail");
                 }
             }
-            writeln!(f, "").expect("Fail");
+            writeln!(f).expect("Fail");
         }
         Ok(())
     }
@@ -128,9 +128,9 @@ fn parse_input(lines: &readfile::Lines) -> (Vec<u8>, Image) {
     }
     let image = Image {
         are_outside_pixels_on: 0,
-        light_pixels: light_pixels,
+        light_pixels,
         min_x: 0,
-        max_x: max_x,
+        max_x,
         min_y: 0,
         max_y: y - 1,
     };

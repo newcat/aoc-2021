@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 
 fn part1(lines: &readfile::Lines) {
     let mut increases = 0;

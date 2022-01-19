@@ -7,7 +7,7 @@ struct Player {
 impl Player {
     pub fn new(position: u8) -> Player {
         return Player {
-            position: position,
+            position,
             score: 0,
         };
     }
@@ -27,7 +27,7 @@ struct Dice {
 impl Dice {
     pub fn new(sides: usize) -> Dice {
         return Dice {
-            sides: sides,
+            sides,
             value: 0,
             rolled: 0,
         };

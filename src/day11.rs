@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use colored::*;
 
 #[derive(Copy, Clone)]
@@ -26,7 +26,7 @@ impl Grid {
             })
             .collect();
         return Grid {
-            octos: octos,
+            octos,
             len_x: all[0].len(),
             len_y: all.len(),
         };
@@ -57,10 +57,7 @@ impl Grid {
     }
 
     pub fn get_value(&self, x: isize, y: isize) -> Option<Octopus> {
-        match self.get(x, y) {
-            Some(o) => Some(*o),
-            None => None,
-        }
+        return self.get(x, y).copied();
     }
 
     pub fn tick(&mut self) -> usize {
@@ -97,7 +94,7 @@ impl Grid {
                     print!("{}", energy.bright_black());
                 }
             }
-            println!("");
+            println!();
         }
     }
 

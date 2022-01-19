@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use colored::*;
 
 const PRINT_DEBUG: bool = false;
@@ -46,17 +46,17 @@ fn part1(lines: &readfile::Lines) {
     let risk_level_sum: u32 = lowest_points.iter().map(|[x, y]| map[*y][*x] + 1).sum();
 
     if PRINT_DEBUG {
-        for y in 0..map.len() {
-            for x in 0..map[y].len() {
+        for (y, map_y) in map.iter().enumerate() {
+            for (x, v) in map_y.iter().enumerate() {
                 if lowest_points.contains(&[x, y]) {
-                    print!("{}", map[y][x].to_string().cyan());
-                } else if map[y][x] < 9 {
-                    print!("{}", map[y][x].to_string().bright_black());
+                    print!("{}", v.to_string().cyan());
+                } else if *v < 9 {
+                    print!("{}", v.to_string().bright_black());
                 } else {
                     print!(" ");
                 }
             }
-            println!("");
+            println!();
         }
     }
 
@@ -65,8 +65,8 @@ fn part1(lines: &readfile::Lines) {
 
 fn find_points_to_visit(
     map: &Map,
-    visited: &Vec<Point>,
-    to_visit: &Vec<Point>,
+    visited: &[Point],
+    to_visit: &[Point],
     [x, y]: Point,
 ) -> Vec<Point> {
     let mut neighbours: Vec<Point> = Vec::new();
@@ -84,7 +84,7 @@ fn find_points_to_visit(
     }
     return neighbours
         .into_iter()
-        .filter(|p| map[p[1]][p[0]] != 9 && !visited.contains(&p) && !to_visit.contains(&p))
+        .filter(|p| map[p[1]][p[0]] != 9 && !visited.contains(p) && !to_visit.contains(p))
         .collect();
 }
 
@@ -97,7 +97,7 @@ fn part2(lines: &readfile::Lines) {
         let mut visited: Vec<Point> = Vec::new();
         let mut to_visit: Vec<Point> = vec![low_point];
         let mut basin_size = 0;
-        while to_visit.len() > 0 {
+        while !to_visit.is_empty() {
             let p = to_visit.pop().unwrap();
             basin_size += 1;
             visited.push(p);
@@ -105,9 +105,9 @@ fn part2(lines: &readfile::Lines) {
         }
         basins.push(basin_size);
     }
-    basins.sort();
+    basins.sort_unstable();
     basins.reverse();
-    let largest_sum: usize = basins.iter().take(3).fold(1, |p, c| p * c);
+    let largest_sum: usize = basins.iter().take(3).product();
     println!("Part 2: {}", largest_sum);
 }
 

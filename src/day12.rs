@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use std::collections::HashMap;
 
 struct AdjacencyList {
@@ -9,7 +9,7 @@ impl AdjacencyList {
     pub fn new(lines: &readfile::Lines) -> AdjacencyList {
         let mut adjacency: HashMap<String, Vec<String>> = HashMap::new();
         for l in lines.lines() {
-            let parts: Vec<&str> = l.split("-").collect();
+            let parts: Vec<&str> = l.split('-').collect();
             let from = parts[0];
             let to = parts[1];
             if !adjacency.contains_key(from) {
@@ -24,12 +24,12 @@ impl AdjacencyList {
         return AdjacencyList { list: adjacency };
     }
 
-    pub fn find_paths(&self, node: &str, visited: &Vec<String>, allow_twice: bool) -> usize {
+    pub fn find_paths(&self, node: &str, visited: &[String], allow_twice: bool) -> usize {
         if node == "end" {
             return 1;
         }
 
-        let mut vclone = visited.clone();
+        let mut vclone = visited.to_owned();
         vclone.push(String::from(node));
         let empty_vec: Vec<String> = Vec::new();
         let adjacency_for_node: &Vec<String> = match self.list.get(node) {
@@ -43,13 +43,11 @@ impl AdjacencyList {
             }
 
             let mut still_allow_twice = allow_twice;
-            if n.chars().next().unwrap().is_ascii_lowercase() {
-                if vclone.contains(n) {
-                    if allow_twice {
-                        still_allow_twice = false;
-                    } else {
-                        continue;
-                    }
+            if n.chars().next().unwrap().is_ascii_lowercase() && vclone.contains(n) {
+                if allow_twice {
+                    still_allow_twice = false;
+                } else {
+                    continue;
                 }
             }
             sum += self.find_paths(n, &vclone, still_allow_twice);

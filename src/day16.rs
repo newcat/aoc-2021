@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 
 #[derive(Debug)]
 enum PacketType {
@@ -21,7 +21,7 @@ impl Packet {
                 let values: Vec<usize> = subpackets.iter().map(|p| p.value()).collect();
                 match self.packet_type_id {
                     0 => values.iter().sum(),
-                    1 => values.iter().fold(1, |p, c| p * c),
+                    1 => values.iter().product(),
                     2 => values.into_iter().min().unwrap(),
                     3 => values.into_iter().max().unwrap(),
                     5 => {
@@ -103,6 +103,7 @@ where
     return PacketType::Literal(value);
 }
 
+#[allow(clippy::needless_collect)]
 fn parse_operator<'a, I>(iter: &mut I) -> PacketType
 where
     I: Iterator<Item = &'a char>,
@@ -141,9 +142,9 @@ where
     }
 
     return Packet {
-        version: version,
-        packet_type_id: packet_type_id,
-        packet_type: packet_type,
+        version,
+        packet_type_id,
+        packet_type,
     };
 }
 

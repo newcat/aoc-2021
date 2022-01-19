@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 use std::collections::HashMap;
@@ -22,8 +22,8 @@ impl Grid {
             .flat_map(|l| l.chars().map(|c| c.to_digit(10).unwrap() as usize))
             .collect();
         return Grid {
-            multiplier: multiplier,
-            costs: costs,
+            multiplier,
+            costs,
             len_x: all[0].len(),
             len_y: all.len(),
         };
@@ -138,8 +138,7 @@ fn run_dijkstra(all_points: &Grid) -> usize {
 
     if PRINT_PATH {
         let mut p = target;
-        let mut path: Vec<Point> = Vec::new();
-        path.push(target);
+        let mut path: Vec<Point> = vec![target];
         loop {
             if p[0] == 0 && p[1] == 0 {
                 break;

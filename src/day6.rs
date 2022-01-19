@@ -1,10 +1,10 @@
-use crate::readfile::readfile;
+use crate::readfile;
 
 type State = [u64; 9];
 
 fn parse_state(line: &str) -> State {
     let mut state: State = [0; 9];
-    let timers = line.split(',').map(|v| usize::from_str_radix(v, 10).unwrap());
+    let timers = line.split(',').map(|v| v.parse::<usize>().unwrap());
     for t in timers {
         // let's just ignore that an easy access out of bounds is possible here
         state[t] += 1;

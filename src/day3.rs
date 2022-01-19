@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 
 fn get_length(lines: &readfile::Lines) -> usize {
     lines.lines().next().unwrap().len()
@@ -28,7 +28,7 @@ fn part1(lines: &readfile::Lines) {
     let occ = occurences(&mut lines.lines(), length);
     let mut gamma: u32 = 0;
     for v in occ.iter() {
-        gamma = gamma << 1;
+        gamma <<= 1;
         if v[1] > v[0] {
             gamma += 1;
         }

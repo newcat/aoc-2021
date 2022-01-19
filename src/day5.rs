@@ -1,19 +1,13 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use regex::Regex;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
-#[derive(Hash)]
+#[derive(Hash, PartialEq, Eq)]
 struct Point {
     x: u16,
     y: u16,
 }
-
-impl PartialEq for Point {
-    fn eq(&self, other: &Self) -> bool {
-        self.x == other.x && self.y == other.y
-    }
-}
-impl Eq for Point {}
 
 struct Line {
     x1: u16,
@@ -30,11 +24,11 @@ impl Line {
 
 fn abs_diff(a: u16, b: u16) -> u16 {
     if a > b {
-      a - b
+        a - b
     } else {
-      b - a
+        b - a
     }
-  }
+}
 
 fn parse_lines(str_lines: &readfile::Lines) -> Vec<Line> {
     let reg: Regex = Regex::new("(\\d+),(\\d+) -> (\\d+),(\\d+)").unwrap();
@@ -54,32 +48,27 @@ fn parse_lines(str_lines: &readfile::Lines) -> Vec<Line> {
 fn line_to_points(line: &Line) -> Vec<Point> {
     let mut points = Vec::new();
 
-    let step_x: i16 = if line.x1 < line.x2 {
-        1
-    } else if line.x1 == line.x2 {
-        0
-    } else {
-        -1
+    let step_x: i16 = match line.x1.cmp(&line.x2) {
+        Ordering::Less => 1,
+        Ordering::Equal => 0,
+        Ordering::Greater => -1,
     };
 
-    let step_y: i16 = if line.y1 < line.y2 {
-        1
-    } else if line.y1 == line.y2 {
-        0
-    } else {
-        -1
+    let step_y: i16 = match line.y1.cmp(&line.y2) {
+        Ordering::Less => 1,
+        Ordering::Equal => 0,
+        Ordering::Greater => -1,
     };
 
     let steps = match step_x {
         0 => abs_diff(line.y1, line.y2) + 1,
-        _ => abs_diff(line.x1, line.x2) + 1
+        _ => abs_diff(line.x1, line.x2) + 1,
     };
 
     let mut x = line.x1;
     let mut y = line.y1;
-    
     for _ in 0..steps {
-        points.push(Point { x: x, y: y });
+        points.push(Point { x, y });
         x = x.checked_add_signed(step_x).unwrap();
         y = y.checked_add_signed(step_y).unwrap();
     }
@@ -87,14 +76,14 @@ fn line_to_points(line: &Line) -> Vec<Point> {
     return points;
 }
 
-fn get_intersecting_point_count(lines: &Vec<Line>, include_diagonals: bool) -> usize {
+fn get_intersecting_point_count(lines: &[Line], include_diagonals: bool) -> usize {
     let mut points: HashMap<Point, u16> = HashMap::new();
     for l in lines {
         if include_diagonals || !l.is_diagonal() {
-            for p in line_to_points(&l) {
+            for p in line_to_points(l) {
                 match points.get_mut(&p) {
                     Some(v) => {
-                        *v = *v + 1;
+                        *v += 1;
                     }
                     None => {
                         points.insert(p, 1);

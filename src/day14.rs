@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use std::collections::HashMap;
 
 type Pair = [char; 2];
@@ -16,7 +16,7 @@ where
     fn insert_or_increase(&mut self, k: &K, amount: usize) {
         if self.contains_key(k) {
             let val_ref = self.get_mut(k).unwrap();
-            *val_ref = *val_ref + amount;
+            *val_ref += amount;
         } else {
             self.insert(*k, amount);
         }
@@ -56,8 +56,8 @@ impl Chemistry {
         }
 
         return Chemistry {
-            pairs: pairs,
-            rules: rules,
+            pairs,
+            rules,
             last_element: polymer[polymer.len() - 1],
         };
     }
@@ -94,8 +94,8 @@ fn iterate(lines: &readfile::Lines, steps: usize) -> usize {
     }
     char_occurences.insert_or_increase(&chem.last_element, 1);
 
-    let mut occurences: Vec<usize> = char_occurences.values().map(|v| *v).collect();
-    occurences.sort();
+    let mut occurences: Vec<usize> = char_occurences.values().copied().collect();
+    occurences.sort_unstable();
     return occurences[occurences.len() - 1] - occurences[0];
 }
 

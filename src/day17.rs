@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use regex::Regex;
 
 struct TargetArea {
@@ -49,10 +49,10 @@ fn simulate(target: &TargetArea, vx_0: i32, vy_0: i32) -> Option<SimulationResul
     if x >= target.xmin && x <= target.xmax && y >= target.ymin && y <= target.ymax {
       // we are in the target area
       return Some(SimulationResult {
-        vx_0: vx_0,
-        vy_0: vy_0,
+        vx_0,
+        vy_0,
         steps: step,
-        max_y: max_y,
+        max_y,
       });
     } else if x > target.xmax || y < target.ymin {
       return None;
@@ -71,11 +71,11 @@ fn fuzz(target: &TargetArea, min_x_guess: i32) -> (SimulationResult, usize) {
 
   for x_guess in min_x_guess..=target.xmax {
     for y_guess in 0.min(target.ymin)..1000 {
-      let simulation = simulate(target, x_guess, y_guess);
-      if simulation.is_some() {
+      let sim_result = simulate(target, x_guess, y_guess);
+      if let Some(simulation) = sim_result {
         valid_simulations += 1;
-        if best_simulation.is_none() || simulation.unwrap().max_y > best_simulation.unwrap().max_y {
-          best_simulation = simulation;
+        if best_simulation.is_none() || simulation.max_y > best_simulation.unwrap().max_y {
+          best_simulation = Some(simulation);
         }
       }
     }

@@ -1,10 +1,9 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashSet;
 
 type Point = [isize; 3];
-type Cuboid = [Point; 2];
 
 struct Operation {
     target_state: bool,
@@ -68,7 +67,7 @@ impl Operation {
 }
 
 fn part1(lines: &readfile::Lines) {
-    let operations: Vec<Operation> = lines.lines().map(|l| Operation::new(&l)).collect();
+    let operations: Vec<Operation> = lines.lines().map(Operation::new).collect();
     let mut state: HashSet<Point> = HashSet::new();
     for op in operations {
         op.perform(&mut state);
@@ -76,7 +75,7 @@ fn part1(lines: &readfile::Lines) {
     println!("Part 1: {}", state.len());
 }
 
-fn part2(lines: &readfile::Lines) {}
+fn part2(_lines: &readfile::Lines) {}
 
 pub fn run() {
     let lines = readfile::Lines::new("day22.txt");

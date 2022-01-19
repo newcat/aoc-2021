@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 
 fn parse_line(line: &str) -> Result<Vec<char>, char> {
     let mut stack: Vec<char> = Vec::new();
@@ -53,26 +53,23 @@ fn part1(lines: &readfile::Lines) {
 fn part2(lines: &readfile::Lines) {
     let mut scores: Vec<usize> = Vec::new();
     for l in lines.lines() {
-        match parse_line(l) {
-            Ok(mut remaining) => {
-                let mut score: usize = 0;
-                while remaining.len() > 0 {
-                    score *= 5;
-                    let c = remaining.pop().unwrap();
-                    score += match c {
-                        '(' => 1,
-                        '{' => 3,
-                        '[' => 2,
-                        '<' => 4,
-                        _ => 0,
-                    }
+        if let Ok(mut remaining) = parse_line(l) {
+            let mut score: usize = 0;
+            while !remaining.is_empty() {
+                score *= 5;
+                let c = remaining.pop().unwrap();
+                score += match c {
+                    '(' => 1,
+                    '{' => 3,
+                    '[' => 2,
+                    '<' => 4,
+                    _ => 0,
                 }
-                scores.push(score);
             }
-            Err(_) => {}
+            scores.push(score);
         }
     }
-    scores.sort();
+    scores.sort_unstable();
     println!("Part 2: {}", scores[scores.len() / 2]);
 }
 

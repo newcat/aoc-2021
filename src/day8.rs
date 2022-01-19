@@ -1,4 +1,4 @@
-use crate::readfile::readfile;
+use crate::readfile;
 use std::collections::HashMap;
 
 /*
@@ -103,7 +103,7 @@ fn str_to_num(mappings: &HashMap<char, usize>, s: &str) -> usize {
     let mut bitmask = 0;
     for c in s.chars() {
         let pos = mappings.get(&c).unwrap();
-        bitmask = bitmask | bit!(pos);
+        bitmask |= bit!(pos);
     }
     match SEGS.iter().position(|&seg| seg == bitmask) {
         Some(value) => return value,

@@ -1,12 +1,12 @@
-use crate::readfile::readfile;
+use crate::readfile;
 
 fn parse(s: &str) -> Vec<usize> {
-    s.split(",")
-        .map(|v| usize::from_str_radix(v, 10).unwrap())
+    s.split(',')
+        .map(|v| v.parse::<usize>().unwrap())
         .collect::<Vec<usize>>()
 }
 
-fn calculate_optimum(positions: &Vec<usize>, fuel_fn: impl Fn(usize, usize) -> usize) -> usize {
+fn calculate_optimum(positions: &[usize], fuel_fn: impl Fn(usize, usize) -> usize) -> usize {
     let min = *positions.iter().min().unwrap();
     let max = *positions.iter().max().unwrap();
     let mut min_fuel = usize::MAX;
@@ -19,12 +19,12 @@ fn calculate_optimum(positions: &Vec<usize>, fuel_fn: impl Fn(usize, usize) -> u
     return min_fuel;
 }
 
-fn part1(positions: &Vec<usize>) {
+fn part1(positions: &[usize]) {
     let min_fuel = calculate_optimum(positions, |p, t| p.abs_diff(t));
     println!("Part 1: {}", min_fuel);
 }
 
-fn part2(positions: &Vec<usize>) {
+fn part2(positions: &[usize]) {
     let min_fuel = calculate_optimum(positions, |p, t| {
         let d = p.abs_diff(t);
         (d * (d + 1)) / 2
