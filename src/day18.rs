@@ -1,11 +1,6 @@
 use crate::readfile;
 use indextree::{Arena, NodeId};
-
-unsafe fn to_mut<T>(reference: &T) -> &mut T {
-    let const_ptr = reference as *const T;
-    let mut_ptr = const_ptr as *mut T;
-    &mut *mut_ptr
-}
+use std::cell::RefCell;
 
 #[derive(Copy, Clone)]
 enum SnailfishNumberType {
@@ -48,7 +43,7 @@ impl std::fmt::Display for SnailfishNumber {
 }
 
 struct Tree {
-    arena: Arena<SnailfishNumber>,
+    arena: Arena<RefCell<SnailfishNumber>>,
     root_node: Option<NodeId>,
 }
 
@@ -69,7 +64,7 @@ impl Tree {
             // number literal
             return self
                 .arena
-                .new_node(SnailfishNumber::new_value(s.parse().unwrap()));
+                .new_node(RefCell::new(SnailfishNumber::new_value(s.parse().unwrap())));
         } else {
             // pair
             let chars: Vec<char> = s.chars().collect();
@@ -98,7 +93,9 @@ impl Tree {
             let num2 = &s[comma_position + 1..s.len() - 1];
             let node1 = self.parse_number(num1);
             let node2 = self.parse_number(num2);
-            let node = self.arena.new_node(SnailfishNumber::new_pair());
+            let node = self
+                .arena
+                .new_node(RefCell::new(SnailfishNumber::new_pair()));
             node.append(node1, &mut self.arena);
             node.append(node2, &mut self.arena);
             return node;
@@ -107,7 +104,7 @@ impl Tree {
 
     pub fn get_children(&self, node: NodeId) -> Option<(NodeId, NodeId)> {
         let data = self.arena.get(node).unwrap().get();
-        match data.node_type {
+        match data.borrow().node_type {
             SnailfishNumberType::Value => None,
             SnailfishNumberType::Pair => {
                 let mut children = node.children(&self.arena);
@@ -133,30 +130,29 @@ impl Tree {
         self.find_index(index + 1)
     }
 
-    pub fn update_index(&mut self) {
+    pub fn update_index(&self) {
         let mut index: usize = 0;
-        let arena = &mut self.arena;
-        for n in self.root_node.unwrap().descendants(arena) {
-            let node = arena.get(n).unwrap();
-            if matches!(node.get().node_type, SnailfishNumberType::Value) {
-                unsafe { to_mut(node.get()) }.index = index;
+        for n in self.root_node.unwrap().descendants(&self.arena) {
+            let node = self.arena.get(n).unwrap();
+            if matches!(node.get().borrow().node_type, SnailfishNumberType::Value) {
+                node.get().borrow_mut().index = index;
                 index += 1;
             }
         }
     }
 
     pub fn get_value(&self, node_id: NodeId) -> Option<usize> {
-        self.arena.get(node_id).map(|n| n.get().value)
+        self.arena.get(node_id).map(|n| n.get().borrow().value)
     }
 
-    pub fn set_value(&mut self, node_id: NodeId, value: usize) {
-        if let Some(node) = self.arena.get_mut(node_id) {
-            node.get_mut().value = value;
+    pub fn set_value(&self, node_id: NodeId, value: usize) {
+        if let Some(node) = self.arena.get(node_id) {
+            node.get().borrow_mut().value = value;
         }
     }
 
     pub fn get_magnitude(&self, node_id: NodeId) -> usize {
-        let data = self.arena.get(node_id).unwrap().get();
+        let data = self.arena.get(node_id).unwrap().get().borrow();
         match data.node_type {
             SnailfishNumberType::Value => data.value,
             SnailfishNumberType::Pair => {
@@ -170,7 +166,9 @@ impl Tree {
         let node1 = self.root_node.unwrap();
         let node2 = self.parse_number(other);
 
-        let new_node = self.arena.new_node(SnailfishNumber::new_pair());
+        let new_node = self
+            .arena
+            .new_node(RefCell::new(SnailfishNumber::new_pair()));
         new_node.append(node1, &mut self.arena);
         new_node.append(node2, &mut self.arena);
 
@@ -179,10 +177,10 @@ impl Tree {
     }
 
     fn find_index_recursive(&self, node: NodeId, index: usize) -> Option<NodeId> {
-        let node_ref = self.arena.get(node).unwrap();
-        match node_ref.get().node_type {
+        let data = self.arena.get(node).unwrap().get().borrow();
+        match data.node_type {
             SnailfishNumberType::Value => {
-                if node_ref.get().index == index {
+                if data.index == index {
                     return Some(node);
                 } else {
                     return None;
@@ -200,7 +198,7 @@ impl Tree {
     }
 
     fn to_string(&self, node: NodeId) -> String {
-        let data = self.arena.get(node).unwrap().get();
+        let data = self.arena.get(node).unwrap().get().borrow();
         match data.node_type {
             SnailfishNumberType::Value => format!("{}", data.value),
             SnailfishNumberType::Pair => {
@@ -216,8 +214,8 @@ impl Tree {
         let (node1, node2) = {
             let (n1, n2) = self.get_children(node_id).unwrap();
             (
-                *self.arena.get(n1).unwrap().get(),
-                *self.arena.get(n2).unwrap().get(),
+                *self.arena.get(n1).unwrap().get().borrow(),
+                *self.arena.get(n2).unwrap().get().borrow(),
             )
         };
         if let Some(left) = self.find_index_left(node1.index) {
@@ -235,7 +233,9 @@ impl Tree {
             .find(|(_i, n)| *n == node_id)
             .unwrap();
         node_id.remove_subtree(&mut self.arena);
-        let new_node = self.arena.new_node(SnailfishNumber::new_value(0));
+        let new_node = self
+            .arena
+            .new_node(RefCell::new(SnailfishNumber::new_value(0)));
         if index == 0 {
             parent.prepend(new_node, &mut self.arena);
         } else {
@@ -244,7 +244,8 @@ impl Tree {
     }
 
     fn reduce_dfs_explode(&mut self, node_id: NodeId, level: usize) -> bool {
-        match self.arena.get(node_id).unwrap().get().node_type {
+        let node_type = { self.arena.get(node_id).unwrap().get().borrow().node_type };
+        match node_type {
             SnailfishNumberType::Value => false,
             SnailfishNumberType::Pair => {
                 if level == 4 {
@@ -252,9 +253,9 @@ impl Tree {
                     true
                 } else {
                     let mut any_true = false;
-                    for n in node_id.children(&self.arena) {
-                        any_true =
-                            any_true || unsafe { to_mut(self) }.reduce_dfs_explode(n, level + 1);
+                    let children: Vec<NodeId> = node_id.children(&self.arena).collect();
+                    for n in children {
+                        any_true = any_true || self.reduce_dfs_explode(n, level + 1);
                     }
                     any_true
                 }
@@ -265,7 +266,7 @@ impl Tree {
     fn find_node_to_split(&self) -> Option<NodeId> {
         for n in self.root_node.unwrap().descendants(&self.arena) {
             let node = self.arena.get(n).unwrap();
-            if node.get().value > 9 {
+            if node.get().borrow().value > 9 {
                 return Some(n);
             }
         }
@@ -274,18 +275,23 @@ impl Tree {
 
     fn split(&mut self) -> bool {
         if let Some(node_id) = self.find_node_to_split() {
-            let node = self.arena.get_mut(node_id).unwrap();
-            let mut data = node.get_mut();
-            let left = num::integer::div_floor(data.value, 2);
-            let right = num::integer::div_ceil(data.value, 2);
-            data.value = 0;
-            data.node_type = SnailfishNumberType::Pair;
+            let left: usize;
+            let right: usize;
+            {
+                let mut data = self.arena.get(node_id).unwrap().get().borrow_mut();
+                left = num::integer::div_floor(data.value, 2);
+                right = num::integer::div_ceil(data.value, 2);
+                data.value = 0;
+                data.node_type = SnailfishNumberType::Pair;
+            }
             node_id.append(
-                self.arena.new_node(SnailfishNumber::new_value(left)),
+                self.arena
+                    .new_node(RefCell::new(SnailfishNumber::new_value(left))),
                 &mut self.arena,
             );
             node_id.append(
-                self.arena.new_node(SnailfishNumber::new_value(right)),
+                self.arena
+                    .new_node(RefCell::new(SnailfishNumber::new_value(right))),
                 &mut self.arena,
             );
             true
