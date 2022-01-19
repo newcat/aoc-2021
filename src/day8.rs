@@ -77,6 +77,7 @@ fn is_possible(index: usize, test: char, input: &str) -> bool {
     return retval;
 }
 
+#[allow(clippy::needless_range_loop)]
 fn clean_possibilities(possibilities: &mut [Vec<char>; 7]) {
     let mut changed = true;
     while changed {
